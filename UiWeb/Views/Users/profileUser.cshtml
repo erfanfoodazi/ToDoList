@@ -1,0 +1,93 @@
+﻿@model UiWeb.Models.ProfileUserViewModel
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">My Profile</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3 fw-bold">Full Name:</div>
+                        <div class="col-md-9">@Model.FullName</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 fw-bold">Username:</div>
+                        <div class="col-md-9">@Model.UserName</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 fw-bold">Email:</div>
+                        <div class="col-md-9">@Model.Email</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 fw-bold">Member Since:</div>
+                        <div class="col-md-9">@Model.CreatedAt</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 fw-bold">Success Rate:</div>
+                        <div class="col-md-9 ">
+                            <div class="d-flex justify-content-start">
+                                <div style="width: 100px; height: 100px;">
+                                    <canvas id="successRateChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/lib/chartjs/chart.umd.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var successRate = @Model.SuccessRate;
+        var ctx = document.getElementById('successRateChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [successRate, 100 - successRate],
+                    backgroundColor: ['#28a745', '#e9ecef'],
+                    borderWidth: 0,
+                    cutout: '70%'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    tooltip: { enabled: false },
+                    legend: { display: false }
+                }
+            },
+            plugins: [{
+                afterDraw: function(chart) {
+                    var ctx = chart.ctx;
+                    var width = chart.width;
+                    var height = chart.height;
+                    var centerX = width / 2;
+                    var centerY = height / 2;
+
+                    ctx.save();
+                    ctx.font = 'bold 20px sans-serif';
+                    ctx.fillStyle = '#2c3e50';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(successRate + '%', centerX, centerY - 5);
+
+                    ctx.font = '10px sans-serif';
+                    ctx.fillStyle = '#6c757d';
+                    ctx.fillText('Success', centerX, centerY + 15);
+                    ctx.restore();
+                }
+            }]
+        });
+    });
+</script>

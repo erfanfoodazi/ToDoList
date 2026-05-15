@@ -1,0 +1,215 @@
+﻿@model List<UiWeb.Models.GroupItemViewModel>
+@{
+    ViewData["Title"] = "My Groups";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg bg-light">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-folder me-2"></i> My Groups
+                    </h4>
+                    <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+                        <i class="fas fa-plus me-1"></i> New Group
+                    </button>
+                </div>
+                <div class="card-body">
+                    @if (!Model.Any())
+                    {
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle me-2"></i>
+                            You don't have any groups yet. Create your first group!
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            @foreach (var group in Model)
+                            {
+                                <div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-body ">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <h5 class="card-title text-primary mb-0">
+                                                    <i class="fas fa-folder-open me-2"></i>@group.Title
+                                                </h5>
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-end">
+                                                        <li>
+                                                            <a class="dropdown-item" href="#" onclick="openEditModal(@group.Id, '@group.Title', @group.RepetitionTypeValue, '@group.EndDate')">
+                                                                <i class="fas fa-edit me-2"></i>Edit
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item text-danger" href="#" onclick="deleteGroup(@group.Id)">
+                                                                <i class="fas fa-trash me-2"></i>Delete
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <span class="badge bg-secondary me-2">
+                                                    <i class="fas fa-sync me-1"></i> @group.RepetitionType
+                                                </span>
+                                                <span class="badge bg-info">
+                                                    <i class="fas fa-tasks me-1"></i> @group.TodoItemsCount Repetitions
+                                                </span>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar-alt me-1"></i>
+                                                    Created: @group.CreatedAt
+                                                </small>
+                                                @if (!string.IsNullOrEmpty(group.EndDate))
+                                                {
+                                                    <br />
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-calendar-times me-1"></i>
+                                                        Ends: @group.EndDate
+                                                    </small>
+                                                }
+                                            </div>
+
+                                            <a asp-controller="TodoItems" asp-action="GroupTodos" asp-route-groupId="@group.Id" class="btn btn-primary btn-sm w-100">
+                                                <i class="fas fa-eye me-1"></i> View Tasks
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Group Modal -->
+<div class="modal fade" id="createGroupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle me-2"></i>Create New Group
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-controller="GroupItems" asp-action="CreateGroup" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Group Title</label>
+                        <input type="text" name="Title" class="form-control" required placeholder="Enter group title" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Repetition Type</label>
+                        <select name="RepetitionTypeValue" class="form-select">
+                            <option value="0">None</option>
+                            <option value="1">Daily</option>
+                            <option value="2">Weekly</option>
+                            <option value="3">Monthly</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label ">End Date (Optional)</label>
+                        <input type="date" name="EndDate" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Group</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Group Modal -->
+<div class="modal fade" id="editGroupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Edit Group
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-controller="GroupItems" asp-action="EditGroup" method="post">
+                <input type="hidden" name="Id" id="editGroupId" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Group Title</label>
+                        <input type="text" name="Title" id="editGroupTitle" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Repetition Type</label>
+                        <select name="RepetitionTypeValue" id="editRepetitionType" class="form-select">
+                            <option value="0">None</option>
+                            <option value="1">Daily</option>
+                            <option value="2">Weekly</option>
+                            <option value="3">Monthly</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">End Date (Optional)</label>
+                        <input type="date" name="EndDate" id="editEndDate" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Update Group</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openEditModal(id, title, repetitionType, endDate) {
+            document.getElementById('editGroupId').value = id;
+            document.getElementById('editGroupTitle').value = title;
+            document.getElementById('editRepetitionType').value = repetitionType;
+
+            if (endDate) {
+                var formattedDate = endDate.split('/').reverse().join('-');
+                document.getElementById('editEndDate').value = formattedDate;
+            } else {
+                document.getElementById('editEndDate').value = '';
+            }
+
+            var editModal = new bootstrap.Modal(document.getElementById('editGroupModal'));
+            editModal.show();
+        }
+
+            function deleteGroup(id) {
+        if (confirm('Are you sure you want to delete this group?')) {
+            var form = document.createElement('form');
+            form.method = 'post';
+            form.action = 'DeleteGroup';
+
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'id';
+            input.value = id;
+
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+            }
+        }
+    </script>
+}

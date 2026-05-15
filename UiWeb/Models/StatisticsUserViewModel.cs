@@ -1,0 +1,18 @@
+﻿namespace UiWeb.Models
+{
+    public class StatisticsUserViewModel
+    {
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public List<RateOfSuccess>? LowPriority { get; set; }
+        public List<RateOfSuccess>? MeduimPriority { get; set; }
+        public List<RateOfSuccess>? HighPriority { get; set; }
+        public List<RateOfSuccess>? CriticalPriority { get; set; }
+    }
+    public class RateOfSuccess
+    {
+        public int PriorityRate { get; set; }
+        public DateTime?  Successed { get; set; }
+    }
+
+}

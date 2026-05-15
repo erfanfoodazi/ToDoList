@@ -1,0 +1,281 @@
+﻿@using UiWeb.Models
+@model StatisticsUserViewModel
+
+@{
+    ViewData["Title"] = "User Statistics";
+}
+
+<style>
+    .statistics-container {
+        padding: 20px;
+        background: #f0f2f5;
+        min-height: 100vh;
+    }
+
+    .page-title {
+        text-align: center;
+        color: #1a1a2e;
+        margin-bottom: 30px;
+    }
+
+        .page-title h2 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .page-title p {
+            color: #6c757d;
+            font-size: 16px;
+        }
+
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+        overflow: hidden;
+    }
+
+    .chart-header {
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-left: 5px solid;
+    }
+
+        .chart-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .chart-header .total-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 8px;
+            background: #e9ecef;
+            color: #495057;
+        }
+
+    .chart-body {
+        padding: 20px;
+    }
+
+    canvas {
+        max-height: 400px;
+        width: 100%;
+    }
+
+    .card-low .chart-header {
+        border-left-color: #28a745;
+    }
+
+        .card-low .chart-header h3 {
+            color: #28a745;
+        }
+
+    .card-medium .chart-header {
+        border-left-color: #ffc107;
+    }
+
+        .card-medium .chart-header h3 {
+            color: #d39e00;
+        }
+
+    .card-high .chart-header {
+        border-left-color: #fd7e14;
+    }
+
+        .card-high .chart-header h3 {
+            color: #e8590c;
+        }
+
+    .card-critical .chart-header {
+        border-left-color: #dc3545;
+    }
+
+        .card-critical .chart-header h3 {
+            color: #c82333;
+        }
+
+    .no-data {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+    }
+
+    @@media (max-width: 768px) {
+        .statistics-container {
+            padding: 10px;
+        }
+
+        .chart-body {
+            padding: 10px;
+        }
+
+        .chart-header h3 {
+            font-size: 16px;
+        }
+    }
+</style>
+
+<div class="statistics-container">
+    <div class="page-title">
+        <h2>📊 Task Statistics</h2>
+        <p>@Model.FirstName @Model.LastName</p>
+    </div>
+
+    @{
+        var priorities = new[]
+        {
+        new { Name = "Low Priority", Key = "low", Color = "#28a745", BgColor = "rgba(40, 167, 69, 0.08)", CardClass = "card-low", Data = Model.LowPriority ?? new List<RateOfSuccess>() },
+        new { Name = "Medium Priority", Key = "medium", Color = "#ffc107", BgColor = "rgba(255, 193, 7, 0.08)", CardClass = "card-medium", Data = Model.MeduimPriority ?? new List<RateOfSuccess>() },
+        new { Name = "High Priority", Key = "high", Color = "#fd7e14", BgColor = "rgba(253, 126, 20, 0.08)", CardClass = "card-high", Data = Model.HighPriority ?? new List<RateOfSuccess>() },
+        new { Name = "Critical Priority", Key = "critical", Color = "#dc3545", BgColor = "rgba(220, 53, 69, 0.08)", CardClass = "card-critical", Data = Model.CriticalPriority ?? new List<RateOfSuccess>() }
+        };
+    }
+
+    @foreach (var priority in priorities)
+    {
+        <div class="chart-card @priority.CardClass">
+            <div class="chart-header">
+                <h3>@priority.Name</h3>
+                <div class="total-badge">
+                    Total: @priority.Data.Sum(d => d.PriorityRate) tasks
+                </div>
+            </div>
+            <div class="chart-body">
+                <canvas id="@(priority.Key)Chart"></canvas>
+            </div>
+        </div>
+    }
+</div>
+
+<script src="~/lib/chartjs/chart.umd.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        var lowData = @Html.Raw(Json.Serialize(Model.LowPriority ?? new List<RateOfSuccess>()));
+        var mediumData = @Html.Raw(Json.Serialize(Model.MeduimPriority ?? new List<RateOfSuccess>()));
+        var highData = @Html.Raw(Json.Serialize(Model.HighPriority ?? new List<RateOfSuccess>()));
+        var criticalData = @Html.Raw(Json.Serialize(Model.CriticalPriority ?? new List<RateOfSuccess>()));
+
+        function formatDate(dateStr) {
+            var date = new Date(dateStr);
+            return date.getFullYear() + '/' +
+                   String(date.getMonth() + 1).padStart(2, '0') + '/' +
+                   String(date.getDate()).padStart(2, '0');
+        }
+
+        function createChart(canvasId, label, data, borderColor, bgColor) {
+            var canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+
+            var ctx = canvas.getContext('2d');
+
+            if (!data || data.length === 0) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['No Data'],
+                        datasets: [{
+                            label: label,
+                            data: [0],
+                            borderColor: borderColor,
+                            backgroundColor: bgColor
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { position: 'top' }
+                        }
+                    }
+                });
+                return;
+            }
+
+            var labels = data.map(function(item) { return formatDate(item.successed); });
+            var values = data.map(function(item) { return item.priorityRate; });
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: values,
+                        borderColor: borderColor,
+                        backgroundColor: bgColor,
+                        borderWidth: 2.5,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        pointBackgroundColor: borderColor,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.75)',
+                            titleColor: '#fff',
+                            bodyColor: '#eee',
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Tasks: ' + context.raw;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Tasks',
+                                font: { size: 12 }
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                precision: 0
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date',
+                                font: { size: 12 }
+                            },
+                            ticks: {
+                                maxRotation: 35,
+                                minRotation: 35,
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        createChart('lowChart', 'Low Priority Tasks', lowData, '#28a745', 'rgba(40, 167, 69, 0.08)');
+        createChart('mediumChart', 'Medium Priority Tasks', mediumData, '#ffc107', 'rgba(255, 193, 7, 0.08)');
+        createChart('highChart', 'High Priority Tasks', highData, '#fd7e14', 'rgba(253, 126, 20, 0.08)');
+        createChart('criticalChart', 'Critical Priority Tasks', criticalData, '#dc3545', 'rgba(220, 53, 69, 0.08)');
+
+    });
+</script>
+

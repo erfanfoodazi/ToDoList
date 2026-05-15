@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - TodoList App</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <button class="btn btn-dark d-md-none position-fixed top-0 start-0 m-3 z-3"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#sidebarMenu"
+            aria-controls="sidebarMenu">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+        <div class="offcanvas-header bg-dark text-white">
+            <h5 class="offcanvas-title" id="sidebarMenuLabel">TodoList App</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body bg-dark p-0">
+            <nav class="nav flex-column">
+                <a class="nav-link text-white py-3 px-4 @((ViewContext.RouteData.Values["action"]?.ToString() == "Index" && ViewContext.RouteData.Values["controller"]?.ToString() == "GroupItems") ? "active bg-primary" : "")"
+                   asp-controller="GroupItems" asp-action="Index">
+                    <i class="fas fa-folder me-2"></i> Groups 
+                </a>
+                <a class="nav-link text-white py-3 px-4 @(ViewContext.RouteData.Values["action"]?.ToString() == "StatisticsUser" ? "active bg-primary" : "")"
+                   asp-controller="GroupItems" asp-action="StatisticsUser">
+                    <i class="fas fa-chart-line me-2"></i> Statistics 
+                </a>
+                <hr class="bg-secondary my-2 mx-3">
+                <a class="nav-link text-white py-3 px-4" asp-controller="Users" asp-action="ProfileUser">
+                    <i class="fas fa-user-circle me-2"></i> Profile 
+                </a>
+                <form asp-controller="Users" asp-action="Login" method="post">
+                    <button type="submit" class="nav-link text-white py-3 px-4 text-danger border-0 w-100 text-start bg-transparent">
+                        <i class="fas fa-sign-out-alt me-2"></i> Login 
+                    </button>
+                </form>
+                <form asp-controller="Users" asp-action="Logout" method="post">
+                    <button type="submit" class="nav-link text-white py-3 px-4 text-danger border-0 bg-transparent w-100 text-start">
+                        <i class="fas fa-sign-out-alt me-2"></i> Logout 
+                    </button>
+                </form>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-lg-2 bg-dark text-white min-vh-100 p-0 d-none d-md-block">
+                <div class="text-center py-4 border-bottom border-secondary">
+                    <h4 class="mb-0">TodoList App</h4>
+                    <small class="text-secondary">Welcome @User.Identity?.Name</small>
+                </div>
+
+                <nav class="nav flex-column mt-3">
+                    <a class="nav-link text-white py-3 px-4 @((ViewContext.RouteData.Values["action"]?.ToString() == "Index" && ViewContext.RouteData.Values["controller"]?.ToString() == "GroupItems") ? "active bg-primary" : "")"
+                       asp-controller="GroupItems" asp-action="Index">
+                        <i class="fas fa-folder me-2"></i> Groups 
+                    </a>
+                    <a class="nav-link text-white py-3 px-4 @(ViewContext.RouteData.Values["action"]?.ToString() == "StatisticsUser" ? "active bg-primary" : "")"
+                       asp-controller="GroupItems" asp-action="StatisticsUser">
+                        <i class="fas fa-chart-line me-2"></i> Statistics 
+                    </a>
+                    <hr class="bg-secondary my-2">
+                    <a class="nav-link text-white py-3 px-4" asp-controller="Users" asp-action="ProfileUser">
+                        <i class="fas fa-user-circle me-2"></i> Profile 
+                    </a>
+                    <form asp-controller="Users" asp-action="Login" method="post" class="mt-auto">
+                        <button type="submit" class="nav-link text-white py-3 px-4 text-danger border-0 w-100 text-start bg-transparent">
+                            <i class="fas fa-sign-out-alt me-2"></i> Login 
+                        </button>
+                    </form>
+                    <form asp-controller="Users" asp-action="Logout" method="post" class="mt-auto">
+                        <button type="submit" class="nav-link text-white py-3 px-4 text-danger border-0 bg-transparent w-100 text-start">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout 
+                        </button>
+                    </form>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 bg-light">
+                <div class="p-4">
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

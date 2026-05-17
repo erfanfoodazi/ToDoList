@@ -8,7 +8,6 @@
         public string? CreatedAt { get; set; }
         public List<RepetitionViewModel> Repetitions { get; set; } = new();
 
-        // Distinct task names for table headers
         public List<string> DistinctTaskNames => Repetitions
             .SelectMany(r => r.TodoItems)
             .Select(t => t.Title)

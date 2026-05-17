@@ -81,10 +81,29 @@ namespace Infrastructure.Repositories
             if (repitedGroup == null)
                 throw new ArgumentNullException(nameof(repitedGroup));
 
+            if (repitedGroup.TodoItems != null && repitedGroup.TodoItems.Any())
+            {
+                foreach (var todo in repitedGroup.TodoItems)
+                {
+                    todo.RepitedGroupId = repitedGroup.Id;  
+                }
+            }
+
             await _context.RepetedGroups.AddAsync(repitedGroup);
             await _context.SaveChangesAsync();
+
+            if (repitedGroup.TodoItems != null && repitedGroup.TodoItems.Any())
+            {
+                foreach (var todo in repitedGroup.TodoItems)
+                {
+                    todo.RepitedGroupId = repitedGroup.Id;
+                }
+                await _context.SaveChangesAsync();
+            }
+
             return repitedGroup;
         }
+
 
         public async Task<List<RepetedGroup>> GetAllRepetationsByGroupIdAsync(int groupId)
         {

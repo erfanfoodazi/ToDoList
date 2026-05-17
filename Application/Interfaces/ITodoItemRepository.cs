@@ -14,8 +14,8 @@ namespace Application.Interfaces
         Task<List<TodoItem>> GetAllTodoItemByUserIdAsync(int id);
         Task<List<TodoItem>> GetTodoItemByGroupIdAsync(int groupId);
         Task<TodoItem> AddTodoItemAsync(TodoItem item);
-        Task<bool> UpdateTodoItemAsync(TodoItem item); 
-        Task<bool> DeleteTodoItemByIdAsync(int id); 
+        Task<bool> UpdateTodoItemAsync(TodoItem item);
+        Task<bool> DeleteTodoItemByTitleAsync(string title, int groupId);
         Task<bool> IsCompleteTodoItemAsync(int id);
         Task<List<TodoItem>> GetTodoItemsByGroupIdAsync(int groupId);
     }

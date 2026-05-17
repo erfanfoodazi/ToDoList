@@ -123,6 +123,7 @@ namespace UiWeb.Services
             };
 
             await _repetitionRepository.CreateRepetationGroupAsync(repetition);
+            
         }
     }
 }

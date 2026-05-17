@@ -192,7 +192,11 @@ namespace UiWeb.Controllers
                 _logger.LogError("fail to find Task");
                 return RedirectToAction("Index","GroupItems");
             }
-            var result = await _mediator.Send(new DeleteTodoCommand { Id = taskId });
+            var result = await _mediator.Send(new DeleteTodoCommand 
+            {
+                GroupId = todo.GroupItemId,
+                Title = todo.Title,
+            });
 
             if (!result)
             {

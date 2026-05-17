@@ -26,15 +26,15 @@ namespace Infrastructure.Repositories
             return item;
         }
 
-        public async Task<bool> DeleteTodoItemByIdAsync(int id)
+        public async Task<bool> DeleteTodoItemByTitleAsync(string title, int groupId)
         {
-            var item = await _context.TodoItems
-                .FirstOrDefaultAsync(x => x.Id == id);
-
-            if(item == null)
+            var items = await _context.TodoItems
+                .Where(t => t.Title == title && t.GroupItemId == groupId)
+                .ToListAsync();
+            if(items == null)
                 return false;
 
-            _context.TodoItems.Remove(item);
+            _context.TodoItems.RemoveRange(items);
             await _context.SaveChangesAsync();
             return true;
         }

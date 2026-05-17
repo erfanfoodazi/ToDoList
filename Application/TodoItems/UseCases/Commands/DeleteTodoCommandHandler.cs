@@ -12,7 +12,7 @@ namespace Application.TodoItems.UseCases.Commands
         }
         public async Task<bool> Handle(DeleteTodoCommand request, CancellationToken cancellationToken)
         {
-            return await _todoItemRepository.DeleteTodoItemByIdAsync(request.Id);
+            return await _todoItemRepository.DeleteTodoItemByTitleAsync(request.Title, (int)request.GroupId);
         }
     }
 }

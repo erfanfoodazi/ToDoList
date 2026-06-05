@@ -34,10 +34,11 @@ namespace Application.Users.UseCases.Commands
                 UserName = request.UserName,
                 Email = request.Email,
                 CreatedAt = DateTime.Now
-            };
+                
+
 
             return await _userRepository.CreateUserAsync(user, request.Password);
-        }
+            }
         private bool IsPasswordStrong(string password)
         {
             if (password.Length < 6)

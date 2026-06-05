@@ -46,7 +46,7 @@ namespace UiWeb.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-             
+
             var result = await _mediator.Send(new LoginUserCommand
             {
                 UserNameOrEmail = model.UserNameOrEmail,
@@ -79,7 +79,7 @@ namespace UiWeb.Controllers
                 return View(model);
             }
 
-            
+
 
             try
             {
@@ -112,14 +112,14 @@ namespace UiWeb.Controllers
         public async Task<IActionResult> ProfileUser()
         {
             var userId = GetCurrentUserId();
-            if(userId == 0)
+            if (userId == 0)
             {
                 TempData["ErrorMessage"] = "User not authenticated.";
                 return RedirectToAction("Login", "Users");
             }
 
 
-            var user = await _mediator.Send(new GetUserByIdQuery { Id = userId});
+            var user = await _mediator.Send(new GetUserByIdQuery { Id = userId });
             if (user == null)
             {
                 TempData["ErrorMessage"] = "User not found.";
@@ -167,5 +167,6 @@ namespace UiWeb.Controllers
             return int.TryParse(userIdClaim, out var userId) ? userId : 0;
         }
 
+       
     }
 }

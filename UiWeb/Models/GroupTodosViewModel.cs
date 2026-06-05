@@ -7,7 +7,7 @@
         public string RepetitionType { get; set; } = string.Empty;
         public string? CreatedAt { get; set; }
         public List<RepetitionViewModel> Repetitions { get; set; } = new();
-
+        public List<RateOfSuccess> RateOfSuccesses { get; set; } = new();
         public List<string> DistinctTaskNames => Repetitions
             .SelectMany(r => r.TodoItems)
             .Select(t => t.Title)

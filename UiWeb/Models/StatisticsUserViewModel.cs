@@ -9,10 +9,5 @@
         public List<RateOfSuccess>? HighPriority { get; set; }
         public List<RateOfSuccess>? CriticalPriority { get; set; }
     }
-    public class RateOfSuccess
-    {
-        public int PriorityRate { get; set; }
-        public DateTime?  Successed { get; set; }
-    }
 
 }

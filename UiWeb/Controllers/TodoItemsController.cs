@@ -5,11 +5,13 @@ using Application.RepetitionGroups.UseCases.Queries;
 using Application.TodoItems.UseCases.Commands;
 using Application.TodoItems.UseCases.Queries;
 using Application.Users.UseCases.Queries;
+using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using UiWeb.Models;
 
 namespace UiWeb.Controllers
@@ -64,6 +66,7 @@ namespace UiWeb.Controllers
                     }).ToList() ?? new()
                 }).ToList()
             };
+            viewModel.RateOfSuccesses = await rateOfSuccess(viewModel);
 
             return View(viewModel);
         }
@@ -224,5 +227,20 @@ namespace UiWeb.Controllers
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             return int.TryParse(userIdClaim, out var userId) ? userId : 0;
         }
+
+        private async Task<List<RateOfSuccess>> rateOfSuccess(GroupTodosViewModel group)
+        {
+            var repetitions = await _mediator.Send(new GetAllRepetitionByGroupQuery { GroupId = group.GroupId });
+
+            return repetitions
+                .Where(r => r.TodoItems != null && r.TodoItems.Any())
+                .Select(r => new RateOfSuccess
+                {
+                    Rate = (r.TodoItems.Count(t => t.IsComplete) * 100) / r.TodoItems.Count,
+                    Successed = r.RepetitionDate
+                })
+                .ToList();
+        }
+
     }
 }

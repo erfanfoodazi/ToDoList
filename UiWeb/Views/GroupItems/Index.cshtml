@@ -163,9 +163,10 @@
                         </select>
                     </div>
 
+
                     <div class="mb-3">
                         <label class="form-label">End Date (Optional)</label>
-                        <input type="date" name="EndDate" id="editEndDate" class="form-control" />
+                        <input type="date" name="EndDate" id="editEndDate" class="form-control" value="" />
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -183,11 +184,14 @@
             document.getElementById('editGroupId').value = id;
             document.getElementById('editGroupTitle').value = title;
             document.getElementById('editRepetitionType').value = repetitionType;
-
-            if (endDate) {
-                var formattedDate = endDate.split('/').reverse().join('-');
-                document.getElementById('editEndDate').value = formattedDate;
-            } else {
+            console.log("endDate:", endDate);
+            console.log("type of endDate:", typeof endDate);
+             if (endDate) {
+            var formattedDate = endDate.replace(/\//g, '-');
+            document.getElementById('editEndDate').value = formattedDate;
+            }
+            else 
+            {
                 document.getElementById('editEndDate').value = '';
             }
 

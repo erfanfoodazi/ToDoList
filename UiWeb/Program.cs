@@ -83,11 +83,11 @@ app.MapControllerRoute(
     pattern: "{controller=Users}/{action=Login}/{id?}");
 
 // Seed data
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await dbContext.Database.MigrateAsync();
-    await SeedData.InitializeAsync(scope.ServiceProvider);
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//    await dbContext.Database.MigrateAsync();
+//    await SeedData.InitializeAsync(scope.ServiceProvider);
+//}
 
 app.Run();

@@ -107,10 +107,21 @@ namespace UiWeb.Controllers
 
         }
 
-        [HttpGet("editgroup")]
-        public IActionResult EditGroup()
+        [HttpGet("editgroup/{id}")]
+        public async Task<IActionResult> EditGroup(int id)
         {
-            return View();
+            var group = await _mediator.Send(new GetGroupItemsByIdQuery { Id = id });
+            var model = new GroupItemViewModel
+            {
+                Id = id,
+                Title = group.Title,
+                EndDate = group.EndRepit.ToString(),
+                CreatedAt = group.CreatedAt.ToString(),
+                RepetitionTypeValue = (int)group.RepetitionType,
+                RepetitionType = group.RepetitionType.ToString(),
+                
+            };
+            return View(group);
         }
 
         [HttpPost("editgroup")]
@@ -208,7 +219,7 @@ namespace UiWeb.Controllers
                 .GroupBy(r => r.Created.Value.Date) 
                 .Select(g => new RateOfSuccess
                 {
-                    PriorityRate = g.Count(),    
+                    Rate = g.Count(),    
                     Successed = g.Key
                 })
                 .OrderBy(r => r.Successed)     

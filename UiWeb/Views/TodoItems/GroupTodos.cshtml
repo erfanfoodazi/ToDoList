@@ -346,6 +346,19 @@
     </div>
 </div>
 
+
+@if (Model.RateOfSuccesses.Any() && Model.RepetitionType.ToLower() != "none")
+{
+    <div class="card mt-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Success Rate Over Time</h5>
+        </div>
+        <div class="card-body">
+            <canvas id="successChart"></canvas>
+        </div>
+    </div>
+}
+
 @section Scripts {
     <script>
         // Add hover effect for rows
@@ -377,7 +390,7 @@
             document.getElementById('editTaskDescription').value = description || '';
             document.getElementById('editGroupId').value = groupId;
 
-            var priorityValue = 1; 
+            var priorityValue = 1;
             switch(priority) {
                 case 'Low':
                     priorityValue = 0;
@@ -472,6 +485,28 @@
                 prioritySelect.addEventListener('change', function() {
                     updatePreview(titleInput ? titleInput.value : '', this.value);
                 });
+            }
+        });
+    </script>
+    <script src="~/lib/chartjs/chart.umd.min.js"></script>
+    <script>
+        var rates = @Html.Raw(Json.Serialize(Model.RateOfSuccesses));
+
+        var labels = rates.map(r => new Date(r.successed).toLocaleDateString());
+        var data = rates.map(r => r.rate);
+
+        new Chart(document.getElementById('successChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Success Rate (%)',
+                    data: data,
+                    borderColor: '#2eaadc',
+                    backgroundColor: 'rgba(46, 170, 220, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
             }
         });
     </script>

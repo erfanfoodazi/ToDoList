@@ -199,7 +199,7 @@ namespace UiWeb.Controllers
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 LowPriority = lowPriorityRate,
-                MeduimPriority = meduimPriorityRate,
+                MediumPriority = meduimPriorityRate,
                 HighPriority = highPriorityRate,
                 CriticalPriority = criticalPriorityRate
             };
@@ -208,24 +208,51 @@ namespace UiWeb.Controllers
         }
         private async Task<List<RateOfSuccess>> GetSuccessrateWithPriority(int userId, int priority)
         {
-            var userGroup = await _mediator.Send(new GetAllGroupItemsByUserIdQuery { UserId = userId });
+            var userGroups = await _mediator.Send(new GetAllGroupItemsByUserIdQuery { UserId = userId });
 
-            var Rate = userGroup
-                .Where(g => g.RepetedGroups != null)
-                .SelectMany(g => g.RepetedGroups ?? new List<RepetedGroup>())
-                .Where(r => r.TodoItems != null)
-                .SelectMany(r => r.TodoItems ?? new List<TodoItem>())
-                .Where(r => (int)r.Priority == priority && r.IsComplete == true) 
-                .GroupBy(r => r.Created.Value.Date) 
+            var result = new List<RateOfSuccess>();
+
+            foreach (var group in userGroups)
+            {
+                // Get all repetitions for this group
+                var repetitions = group.RepetedGroups ?? new List<RepetedGroup>();
+
+                foreach (var repetition in repetitions)
+                {
+                    if (repetition.TodoItems == null || !repetition.TodoItems.Any())
+                        continue;
+
+                    // Filter todo items by priority for this repetition
+                    var priorityTasks = repetition.TodoItems.Where(t => (int)t.Priority == priority).ToList();
+                    
+                    if (!priorityTasks.Any())
+                        continue;
+
+                    // Calculate completion rate for this priority in this repetition
+                    var totalTasks = priorityTasks.Count;
+                    var completedTasks = priorityTasks.Count(t => t.IsComplete);
+                    var rate = totalTasks > 0 ? (int)Math.Round((double)completedTasks / totalTasks * 100) : 0;
+
+                    result.Add(new RateOfSuccess
+                    {
+                        Rate = rate,
+                        Successed = repetition.RepetitionDate
+                    });
+                }
+            }
+
+            // Group by date and average the rates for same date
+            var groupedResult = result
+                .GroupBy(r => r.Successed.Value.Date)
                 .Select(g => new RateOfSuccess
                 {
-                    Rate = g.Count(),    
+                    Rate = (int)Math.Round(g.Average(r => r.Rate)),
                     Successed = g.Key
                 })
-                .OrderBy(r => r.Successed)     
+                .OrderBy(r => r.Successed)
                 .ToList();
 
-            return Rate;
+            return groupedResult;
         }
         private int GetCurrentUserId()
         {

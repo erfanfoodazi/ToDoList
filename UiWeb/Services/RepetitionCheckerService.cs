@@ -111,7 +111,7 @@ namespace UiWeb.Services
                 IsComplete = false,
                 Created = DateTime.Now,
                 UserId = group.UserId,
-                GroupItemId = group.Id
+                GroupItemId = null
             }).ToList();
 
             var repetition = new RepetedGroup

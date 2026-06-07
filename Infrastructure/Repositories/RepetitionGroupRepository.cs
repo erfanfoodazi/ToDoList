@@ -85,7 +85,8 @@ namespace Infrastructure.Repositories
             {
                 foreach (var todo in repitedGroup.TodoItems)
                 {
-                    todo.RepitedGroupId = repitedGroup.Id;  
+                    todo.RepitedGroupId = repitedGroup.Id;
+                    todo.GroupItemId = null;
                 }
             }
 
@@ -167,7 +168,7 @@ namespace Infrastructure.Repositories
                     IsComplete = false,
                     Created = DateTime.Now,
                     UserId = todoItemDto.UserId,
-                    GroupItemId = groupId,
+                    GroupItemId = null,
                     RepitedGroupId = newRepetition.Id
                 };
 
@@ -185,7 +186,7 @@ namespace Infrastructure.Repositories
                             IsComplete = false,
                             Created = DateTime.Now,
                             UserId = todoItemDto.UserId,
-                            GroupItemId = groupId,
+                            GroupItemId = null,
                             RepitedGroupId = newRepetition.Id
                         });
                     }
@@ -206,7 +207,7 @@ namespace Infrastructure.Repositories
                     IsComplete = false,
                     Created = DateTime.Now,
                     UserId = todoItemDto.UserId,
-                    GroupItemId = groupId,
+                    GroupItemId = null,
                     RepitedGroupId = repetition.Id
                 };
 

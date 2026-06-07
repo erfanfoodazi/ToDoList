@@ -232,14 +232,27 @@ namespace UiWeb.Controllers
         {
             var repetitions = await _mediator.Send(new GetAllRepetitionByGroupQuery { GroupId = group.GroupId });
 
-            return repetitions
-                .Where(r => r.TodoItems != null && r.TodoItems.Any())
-                .Select(r => new RateOfSuccess
+            var result = new List<RateOfSuccess>();
+            foreach (var repetition in repetitions)
+            {
+                var count = repetition.TodoItems.Count;
+                int competed = 0;
+                foreach (var task in repetition.TodoItems)
                 {
-                    Rate = (r.TodoItems.Count(t => t.IsComplete) * 100) / r.TodoItems.Count,
-                    Successed = r.RepetitionDate
-                })
-                .ToList();
+                    if(task.IsComplete)
+                        competed++;
+                }
+                var rate = (int)Math.Round((double)competed / count * 100);
+                var rateOfSucces = new RateOfSuccess()
+                {
+                    Rate = rate,
+                    Successed = repetition.RepetitionDate
+                };
+
+                result.Add(rateOfSucces);
+            }
+
+            return result;
         }
 
     }

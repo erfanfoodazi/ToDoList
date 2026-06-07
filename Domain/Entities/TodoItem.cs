@@ -20,7 +20,7 @@ namespace Domain.Entities
         [ForeignKey("GroupItemId")]
         public GroupItem? GroupItem { get; set; }
         public int? RepitedGroupId{ get; set; }
-        [ForeignKey("GroupRepetitionId")]
+        [ForeignKey("RepitedGroupId")]
         public RepetedGroup? RepitedGroup { get; set; }
         public int? UserId { get; set; }
         [ForeignKey("UserId")]

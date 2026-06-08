@@ -103,5 +103,15 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<bool> DeleteTodoItemByTodoIdAsync(int todoId)
+        {
+            var item = await _context.TodoItems.FindAsync(todoId);
+            if(item == null) return false;
+
+            _context.TodoItems.Remove(item);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

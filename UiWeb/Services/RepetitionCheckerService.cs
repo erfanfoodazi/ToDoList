@@ -1,5 +1,8 @@
 ﻿
+using Application.GroupItems.UseCases.Queries;
 using Application.Interfaces;
+using Application.RepetitionGroups.UseCases.Queries;
+using Application.TodoItems.UseCases.Commands;
 using Domain.Entities;
 using Domain.Enums;
 using MediatR;
@@ -31,11 +34,12 @@ namespace UiWeb.Services
             {
                 _logger.LogInformation("Checking repetitions for user {UserId}", userId);
 
-                var groups = await _groupRepository.GetAllGroupItemsByUserId(userId);
+                var groups = await _mediator.Send(new GetAllGroupItemsByUserIdQuery { UserId = userId});
 
                 foreach (var group in groups)
                 {
                     await CheckAndGenerateForGroup(group);
+                    await CheckAndRemoveAdditionalTodos(group);
                 }
 
                 _logger.LogInformation("Repetition check completed for user {UserId}", userId);
@@ -51,7 +55,7 @@ namespace UiWeb.Services
             if (group.RepetitionType == RepetitionType.None)
                 return;
 
-            var existingRepetitions = await _repetitionRepository.GetAllRepetitionsByGroupIdAsync(group.Id);
+            var existingRepetitions = await _mediator.Send(new GetAllRepetitionByGroupQuery { GroupId = group.Id});
             var lastRepetition = existingRepetitions.OrderByDescending(r => r.RepetitionDate).FirstOrDefault();
 
             DateTime startDate;
@@ -124,6 +128,31 @@ namespace UiWeb.Services
 
             await _repetitionRepository.CreateRepetationGroupAsync(repetition);
             
+        }
+
+        private async Task CheckAndRemoveAdditionalTodos(GroupItem group)
+        {
+            var repetitions = await _mediator.Send(new GetAllRepetitionByGroupQuery() { GroupId = group.Id });
+            
+            foreach (var repetition in repetitions)
+            {
+                var tasks = repetition.TodoItems;
+                if (tasks == null || !tasks.Any())
+                    continue;
+
+                var duplicateGroups = tasks
+                    .GroupBy(t => new { t.Title, t.GroupItemId, t.RepitedGroupId })
+                    .Where(g => g.Count() > 1);
+
+                foreach (var duplicateGroup in duplicateGroups)
+                {
+                    var tasksToDelete = duplicateGroup.Skip(1).ToList();
+                    foreach (var task in tasksToDelete)
+                    {
+                        await _mediator.Send(new DeleteTodoByIdCommand { TodoId = task.Id });
+                    }
+                }
+            }
         }
     }
 }

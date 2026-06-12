@@ -146,17 +146,17 @@ namespace UiWeb.Controllers
         {
             var userGroup = await _mediator.Send(new GetAllGroupItemsByUserIdQuery { UserId = userId });
 
-            var allRepetitions = userGroup
+            var allTodoItems = userGroup
                 .Where(g => g.RepetedGroups != null)
-                .SelectMany(g => g.RepetedGroups!)
+                .SelectMany(g => g.TodoItems ?? Enumerable.Empty<TodoItem>())
                 .ToList();
 
-            int totalCount = allRepetitions.Count;
-
-            if (totalCount == 0)
+            if (!allTodoItems.Any())
                 return 0;
 
-            int completedCount = allRepetitions.Count(r => r.IsCompleted);
+            int totalCount = allTodoItems.Count;
+            int completedCount = allTodoItems.Count(item => item.IsComplete);
+
             return (completedCount * 100) / totalCount;
         }
         private int GetCurrentUserId()

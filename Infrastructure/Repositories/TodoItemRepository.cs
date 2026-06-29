@@ -26,12 +26,12 @@ namespace Infrastructure.Repositories
             return item;
         }
 
-        public async Task<bool> DeleteTodoItemByTitleAsync(string title, int groupId)
+        public async Task<bool> DeleteTodoItemByTitleAsync(string title, int? groupId)
         {
             var items = await _context.TodoItems
                 .Where(t => t.Title == title && t.GroupItemId == groupId)
                 .ToListAsync();
-            if(items == null)
+            if(items == null || items.Count == 0)
                 return false;
 
             _context.TodoItems.RemoveRange(items);
@@ -46,7 +46,7 @@ namespace Infrastructure.Repositories
 
         }
 
-        public async Task<List<TodoItem>> GetTodoItemByGroupIdAsync(int groupId)
+        public async Task<List<TodoItem>> GetTodoItemByGroupIdAsync(int? groupId)
         {
             return await _context.TodoItems
                 .Where(t => t.GroupItemId == groupId)

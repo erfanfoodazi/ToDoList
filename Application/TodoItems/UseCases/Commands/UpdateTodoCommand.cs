@@ -14,7 +14,7 @@ namespace Application.TodoItems.UseCases.Commands
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public int Priority { get; set; }
-        public int GroupItemId { get; set; }
+        public int? GroupItemId { get; set; }
             
     }
 }

@@ -12,10 +12,10 @@ namespace Application.Interfaces
         Task<List<TodoItem>> GetAllTodoItemsAsync();
         Task<TodoItem?> GetTodoItemByIdAsync(int id);  
         Task<List<TodoItem>> GetAllTodoItemByUserIdAsync(int id);
-        Task<List<TodoItem>> GetTodoItemByGroupIdAsync(int groupId);
+        Task<List<TodoItem>> GetTodoItemByGroupIdAsync(int? groupId);
         Task<TodoItem> AddTodoItemAsync(TodoItem item);
         Task<bool> UpdateTodoItemAsync(TodoItem item);
-        Task<bool> DeleteTodoItemByTitleAsync(string title, int groupId);
+        Task<bool> DeleteTodoItemByTitleAsync(string title, int? groupId);
         Task<bool> DeleteTodoItemByTodoIdAsync(int todoId);
         Task<bool> IsCompleteTodoItemAsync(int id);
         Task<List<TodoItem>> GetTodoItemsByGroupIdAsync(int groupId);

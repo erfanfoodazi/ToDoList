@@ -86,7 +86,8 @@ namespace UiWeb.Controllers
             if (!result)
             {
                 TempData["ErrorMessage"] = "Failed to update task status.";
-                return RedirectToAction("GroupTodos", new { groupId = todo.GroupItemId });
+                var groupId = todo.GroupItemId ?? repetition.GroupId;
+                return RedirectToAction("GroupTodos", new { groupId });
             }
 
             TempData["SuccessMessage"] = "Task status updated successfully!";
@@ -169,20 +170,25 @@ namespace UiWeb.Controllers
         public async Task<IActionResult> EditTask(int  taskId,string Title,string Description,int Priority)
         {
             var todo = await _mediator.Send(new GetTodoByIdQuery { Id = taskId });
-            if(todo == null)
+            if (todo == null)
+            {
                 TempData["ErrorMessage"] = "Failed to edit task";
+                return RedirectToAction("Index","GroupItems");
+            }
             var result = await _mediator.Send(new UpdateTodoCommand
             {
                 Id = taskId,
                 Title = Title,
                 Description = Description,
                 Priority = Priority,
-                GroupItemId = (int)todo.GroupItemId
+                GroupItemId = todo.GroupItemId
             });
             if (!result)
                 TempData["ErrorMessage"] = "Failed to edit task";
 
-            return RedirectToAction("GroupTodos", new { groupId = todo.GroupItemId });
+            var groupId = todo.GroupItemId ?? todo.RepitedGroup?.GroupId;
+            if (groupId == null) return RedirectToAction("Index", "GroupItems");
+            return RedirectToAction("GroupTodos", new { groupId });
         }
 
         [HttpPost("TodoItems/DeleteTask/{taskId}")]
@@ -201,15 +207,18 @@ namespace UiWeb.Controllers
                 Title = todo.Title,
             });
 
+            var groupId = todo.GroupItemId ?? todo.RepitedGroup?.GroupId;
             if (!result)
             {
                 TempData["ErrorMessage"] = "Failed to delete task";
                 _logger.LogError($"fail to Delete {todo.Title}");
-                return RedirectToAction("GroupTodos", new { groupId = todo.GroupItemId });
+                if (groupId == null) return RedirectToAction("Index", "GroupItems");
+                return RedirectToAction("GroupTodos", new { groupId });
             }
             TempData["SuccessMessage"] = "delete was successfully";
             _logger.LogInformation($"delet {todo.Title} was successfully");
-            return RedirectToAction("GroupTodos",new {groupId = todo.GroupItemId});
+            if (groupId == null) return RedirectToAction("Index", "GroupItems");
+            return RedirectToAction("GroupTodos", new { groupId });
         }
 
         private List<SelectListItem> GetPriorityOptions()
